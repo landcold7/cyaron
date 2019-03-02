@@ -4,7 +4,7 @@ from functools import reduce
 import random
 
 
-class String:
+class String(object):
     @staticmethod
     def random(length_range, **kwargs):
         length = length_range

@@ -26,7 +26,8 @@ class TestCompare(unittest.TestCase):
     def test_noipstyle_correct(self):
         io = None
         with captured_output() as (out, err):
-            io = IO("test_compare.in", "test_compare.out")
+            io = IO("test_compare.in",
+                    "test_compare.out")
 
         io.output_writeln("test123 \ntest123\n")
         with open("test_another.out", "w") as f:
@@ -41,7 +42,8 @@ class TestCompare(unittest.TestCase):
     def test_noipstyle_incorrect(self):
         io = None
         with captured_output() as (out, err):
-            io = IO("test_compare_incorrect.in", "test_compare_incorrect.out")
+            io = IO("test_compare_incorrect.in",
+                    "test_compare_incorrect.out")
 
         io.output_writeln("test123 \ntest123\n")
         with open("test_another_incorrect.out", "w") as f:
@@ -60,7 +62,9 @@ class TestCompare(unittest.TestCase):
             self.assertTrue(False)
 
         result = out.getvalue().strip()
-        self.assertEqual(result, "test_another_incorrect.out: !!!INCORRECT!!! On line 2 column 7, read 4, expected 3.")
+        self.assertEqual(result,
+                         "test_another_incorrect.out: !!!INCORRECT!!! "
+                         "On line 2 column 7, read 4, expected 3.")
 
     def test_fulltext_program(self):
         with open("correct.py", "w") as f:
@@ -77,7 +81,11 @@ class TestCompare(unittest.TestCase):
 
         try:
             with captured_output() as (out, err):
-                Compare.program("python correct.py", "python incorrect.py", std=io, input=io, grader="FullText")
+                Compare.program("python correct.py",
+                                "python incorrect.py",
+                                std=io,
+                                input=io,
+                                grader="FullText")
         except CompareMismatch as e:
             self.assertEqual(e.name, 'python incorrect.py')
             e = e.mismatch
@@ -89,7 +97,11 @@ class TestCompare(unittest.TestCase):
             self.assertTrue(False)
 
         result = out.getvalue().strip()
-        correct_out = 'python correct.py: Correct \npython incorrect.py: !!!INCORRECT!!! Hash mismatch: read 53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3, expected 4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865'
+        correct_out = ('python correct.py: Correct \n'
+                       'python incorrect.py: !!!INCORRECT!!! '
+                       'Hash mismatch: '
+                       'read 53c234e5e8472b6ac51c1ae1cab3fe06fad053beb8ebfd8977b010655bfdd3c3, '
+                       'expected 4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865')
         self.assertEqual(result, correct_out)
 
     def test_file_input(self):
@@ -106,7 +118,10 @@ class TestCompare(unittest.TestCase):
         io.input_writeln("233")
 
         with captured_output() as (out, err):
-            Compare.program("python correct.py", std_program="python std.py", input=io, grader="NOIPStyle")
+            Compare.program("python correct.py",
+                            std_program="python std.py",
+                            input=io,
+                            grader="NOIPStyle")
 
         result = out.getvalue().strip()
         correct_out = 'python correct.py: Correct'
@@ -117,15 +132,21 @@ class TestCompare(unittest.TestCase):
         for fn in programs:
             with open(fn, 'w') as f:
                 f.write('print({})'.format(16))
+
         with open('std.py', 'w') as f:
             f.write('print({})'.format(16))
+
         with IO() as test:
-            Compare.program(*[(sys.executable, program) for program in programs], std_program=(sys.executable, 'std.py'), max_workers=None, input=test)
+            Compare.program(*[(sys.executable, prog) for prog in programs],
+                            std_program=(sys.executable, 'std.py'),
+                            max_workers=None,
+                            input=test)
 
         ios = [IO() for i in range(16)]
         try:
             for f in ios:
                 f.output_write('16')
+
             with IO() as std:
                 std.output_write('16')
                 Compare.output(*ios, std=std, max_workers=None)
@@ -133,11 +154,15 @@ class TestCompare(unittest.TestCase):
             for io in ios:
                 io.close()
 
+
     def test_timeout(self):
         if sys.version_info >= (3, 3):
             with IO() as test:
                 try:
-                    Compare.program(((sys.executable, '-c', '__import__(\'time\').sleep(10)'), 1), std=test, input=test)
+                    cmd = "__import__('time').sleep(10)"
+                    Compare.program(((sys.executable, '-c', cmd), 1),
+                                    std=test,
+                                    input=test)
                 except subprocess.TimeoutExpired:
                     pass
                 else:

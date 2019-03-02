@@ -2,6 +2,7 @@ from __future__ import print_function
 from functools import partial
 import sys
 from threading import Lock
+from .utils import make_unicode
 try:
     import colorful
 except ImportError:
@@ -9,7 +10,6 @@ except ImportError:
         def __getattr__(self, attr):
             return lambda st: st
     colorful = colorful()
-from .utils import make_unicode
 
 __print = print
 def _print(*args, **kwargs):
@@ -33,23 +33,10 @@ _log_lock = Lock()
 def log(funcname, *args, **kwargs):
     """log with log function specified by ``funcname``"""
     _log_lock.acquire()
-    rv = _log_funcs.get(funcname, lambda *args, **kwargs: None)(*args, **kwargs)
+    default = lambda *args, **kwargs : None
+    rv = _log_funcs.get(funcname, default)(*args, **kwargs)
     _log_lock.release()
     return rv
-
-"""5 log levels
-1. debug:   debug info
-2. info:    common info
-3. print:   print output
-4. warn:    warnings
-5. error:   errors
-"""
-
-debug = partial(log, 'debug')
-info = partial(log, 'info')
-print = partial(log, 'print')
-warn = partial(log, 'warn')
-error = partial(log, 'error')
 
 def register_logfunc(funcname, func):
     """register logfunc
@@ -64,10 +51,25 @@ def register_logfunc(funcname, func):
         except KeyError:
             pass
 
-_nb_print = lambda *args, **kwargs: _print(*args, **_join_dict(kwargs, {'flush': True}))
-_nb_print_e = lambda *args, **kwargs: _print(*args, **_join_dict(kwargs, {'file': sys.stderr, 'flush': True}))
-_cl_print = lambda color, *args, **kwargs: _nb_print(*[color(make_unicode(item)) for item in args], **kwargs) if sys.stdout.isatty() else _nb_print(*args, **kwargs)
-_cl_print_e = lambda color, *args, **kwargs: _nb_print_e(*[color(make_unicode(item)) for item in args], **kwargs) if sys.stderr.isatty() else _nb_print_e(*args, **kwargs)
+def _nb_print(*args, **kwargs):
+    kwargs.update({'flush': True})
+    _print(*args, **kwargs)
+
+def _nb_print_e(*args, **kwargs):
+    kwargs.update({'file': sys.stderr, 'flush': True})
+    _print(*args, **kwargs)
+
+def _cl_print(color, *args, **kwargs):
+    if sys.stdout.isatty():
+        _nb_print(*[color(make_unicode(item)) for item in args], **kwargs)
+    else:
+        _nb_print(*args, **kwargs)
+
+def _cl_print_e(color, *args, **kwargs):
+    if sys.stderr.isatty():
+        _nb_print_e(*[color(make_unicode(item)) for item in args], **kwargs)
+    else:
+        _nb_print_e(*args, **kwargs)
 
 _default_debug = partial(_cl_print, colorful.cyan)
 _default_info = partial(_cl_print, colorful.blue)
@@ -99,4 +101,19 @@ def set_verbose():
     register_logfunc('warn', _default_warn)
     register_logfunc('error', _default_error)
 
+
 set_normal()
+
+"""5 log levels
+1. debug:   debug info
+2. info:    common info
+3. print:   print output
+4. warn:    warnings
+5. error:   errors
+"""
+debug = partial(log, 'debug')
+info = partial(log, 'info')
+print = partial(log, 'print')
+warn = partial(log, 'warn')
+error = partial(log, 'error')
+

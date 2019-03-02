@@ -26,7 +26,10 @@ class TestIO(unittest.TestCase):
 
     def test_create_files_prefix_id(self):
         with captured_output() as (out, err):
-            IO(file_prefix="test_prefix", data_id=233, input_suffix=".inp", output_suffix=".ans")
+            IO(file_prefix="test_prefix",
+               data_id=233,
+               input_suffix=".inp",
+               output_suffix=".ans")
         self.assertTrue(os.path.exists("test_prefix233.inp"))
         self.assertTrue(os.path.exists("test_prefix233.ans"))
 

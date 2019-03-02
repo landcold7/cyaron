@@ -2,7 +2,7 @@ import unittest
 from cyaron import Graph
 
 
-class UnionFindSet:
+class UnionFindSet(object):
     def __init__(self, size):
         self.father = [0] + [i + 1 for i in range(size)]
 
@@ -103,13 +103,17 @@ class TestGraph(unittest.TestCase):
                 ufs.merge(edge.start, edge.end)
             for i in range(graph_size-1):
                 self.assertTrue(ufs.test_same(i+1, i+2))
-            
+
 
     def test_DAG(self):
         graph_size = 20
         for _ in range(10): # test 10 times
             ufs = UnionFindSet(graph_size)
-            graph = Graph.DAG(graph_size, int(graph_size*1.6), repeated_edges=False, self_loop=False, loop=True)
+            graph = Graph.DAG(graph_size,
+                              int(graph_size*1.6),
+                              repeated_edges=False,
+                              self_loop=False,
+                              loop=True)
 
             self.assertEqual(len(list(graph.iterate_edges())), int(graph_size*1.6))
 
@@ -122,7 +126,11 @@ class TestGraph(unittest.TestCase):
         graph_size = 20
         for _ in range(10): # test 10 times
             ufs = UnionFindSet(graph_size)
-            graph = Graph.DAG(graph_size, int(graph_size*1.6), repeated_edges=False, self_loop=False, loop=False)
+            graph = Graph.DAG(graph_size,
+                              int(graph_size*1.6),
+                              repeated_edges=False,
+                              self_loop=False,
+                              loop=False)
 
             self.assertEqual(len(list(graph.iterate_edges())), int(graph_size*1.6))
 
@@ -138,7 +146,10 @@ class TestGraph(unittest.TestCase):
         graph_size = 20
         for _ in range(10): # test 10 times
             ufs = UnionFindSet(graph_size)
-            graph = Graph.UDAG(graph_size, int(graph_size*1.6), repeated_edges=False, self_loop=False)
+            graph = Graph.UDAG(graph_size,
+                               int(graph_size*1.6),
+                               repeated_edges=False,
+                               self_loop=False)
 
             self.assertEqual(len(list(graph.iterate_edges())), int(graph_size*1.6))
 
@@ -148,6 +159,8 @@ class TestGraph(unittest.TestCase):
                 self.assertTrue(ufs.test_same(i+1, i+2))
 
     def test_DAG_boundary(self):
-        with self.assertRaises(Exception, msg="the number of edges of connected graph must more than the number of nodes - 1"):
+        msg = ("the number of edges of connected graph must more than the"
+              "number of nodes - 1")
+        with self.assertRaises(Exception, msg=msg):
             Graph.DAG(8, 6)
         Graph.DAG(8, 7)

@@ -1,6 +1,6 @@
 from .utils import *
 
-class Sequence:
+class Sequence(object):
     """Class Sequence: the tool class for sequences.
     """
 

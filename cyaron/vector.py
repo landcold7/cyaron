@@ -5,7 +5,7 @@ from .utils import *
 import random
 
 
-class Vector:
+class Vector(object):
     @staticmethod
     def random(num=5, position_range=[10], mode=0, **kwargs):
         # mode 0=unique 1=repeatable 2=float
@@ -29,17 +29,21 @@ class Vector:
                 raise Exception("the difference must more than 0")
             vector_space *= (position_range[i] + 1)
         if(mode == 0 and num > vector_space):
-            raise Exception("1st param is too large that CYaRon can not generate unique vectors")
+            raise Exception("1st param is too large that CYaRon "
+                            "can not generate unique vectors")
         result = []
-        
+
         if(mode == 2 or mode == 1):
             for i in range(0, num):
                 tmp = []
                 for j in range(0, dimension):
-                    one_num = random.randint(0,position_range[j]) if mode == 1 else random.uniform(0,position_range[j])
+                    if mode == 1:
+                        one_num = random.randint(0,position_range[j])
+                    else:
+                        one_num = random.uniform(0,position_range[j])
                     tmp.insert(j, one_num + offset[j])
                 result.insert(i, tmp)
-                
+
         elif((mode == 0 and vector_space > 5 * num)):
             num_set = set([])
             rand = 0;
@@ -54,8 +58,7 @@ class Vector:
                 for j in range(0, dimension):
                     tmp[j] += offset[j]
                 result.insert(i, tmp)
-                         
-            
+
         else:
             # generate 0~vector_space and shuffle
             rand_arr = [i for i in range(0, vector_space)]
@@ -67,12 +70,12 @@ class Vector:
                 result.insert(i, tmp)
         return result
 
-    @staticmethod      
+    @staticmethod
     def get_vector(dimension, position_range, hashnum):
         tmp = []
         for i in range(0, dimension):
             tmp.insert(i, hashnum % (position_range[i] + 1))
             hashnum //= (position_range[i] + 1)
         return tmp
-        
-            
+
+

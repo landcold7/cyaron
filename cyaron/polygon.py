@@ -5,7 +5,7 @@ import random
 import math
 
 
-class Polygon:
+class Polygon(object):
     def __init__(self,points=[]):
         if not list_like(points):
             raise Exception("polygon must be constructed by a list of points")
